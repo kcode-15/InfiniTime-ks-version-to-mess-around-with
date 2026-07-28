@@ -1,65 +1,57 @@
 #pragma once
 
-#include "displayapp/apps/Apps.h"
-#include "displayapp/screens/Screen.h"
-#include "displayapp/widgets/Counter.h"
-#include "displayapp/Controllers.h"
-#include "Symbols.h"
-
-#include <array>
+#include <cstdint>
+#include <memory>
 #include <random>
+#include "displayapp/screens/Screen.h"
+#include "components/settings/Settings.h"
+#include "components/motor/MotorController.h"
+#include "components/motion/MotionController.h"
+#include "components/graphics/RgbColor.h"
+#include "lvgl/lvgl.h"
 
 namespace Pinetime {
   namespace Applications {
     namespace Screens {
-      class Dice : public Screen {
+
+      class Bored : public Screen {
       public:
-        Dice(Controllers::MotionController& motionController,
-             Controllers::MotorController& motorController,
-             Controllers::Settings& settingsController);
-        ~Dice() override;
+        Bored(Controllers::MotionController& motionController,
+              Controllers::MotorController& motorController,
+              Controllers::Settings& settingsController);
+        ~Bored() override;
+
         void Roll();
-        void Refresh() override;
 
       private:
-        lv_obj_t* btnRoll;
-        lv_obj_t* btnRollLabel;
-        lv_obj_t* resultTotalLabel;
-        lv_obj_t* resultIndividualLabel;
-        lv_task_t* refreshTask;
-        bool enableShakeForDice = false;
-
-        std::mt19937 gen;
-
-        std::array<lv_color_t, 3> resultColors = {LV_COLOR_YELLOW, LV_COLOR_MAGENTA, LV_COLOR_AQUA};
-        uint8_t currentColorIndex;
-        void NextColor();
-
-        Widgets::Counter nCounter = Widgets::Counter(1, 9, jetbrains_mono_42);
-        Widgets::Counter dCounter = Widgets::Counter(2, 99, jetbrains_mono_42);
-
-        bool openingRoll = true;
-        uint8_t currentRollHysteresis = 0;
-        static constexpr uint8_t rollHysteresis = 10;
-
         Controllers::MotorController& motorController;
         Controllers::MotionController& motionController;
         Controllers::Settings& settingsController;
+
+        bool openingRoll = true;
+        bool enableShakeForDice = false;
+
+        static constexpr uint8_t rollHysteresis = 10;
+        uint8_t currentRollHysteresis = 0;
+
+        std::size_t currentColorIndex = 0;
+
+        std::mt19937 gen;
+
+        lv_obj_t* resultTotalLabel;
+        lv_obj_t* btnRoll;
+        lv_obj_t* btnRollLabel;
+
+        lv_task_t* refreshTask;
+
+        void Refresh();
+        void NextColor();
+
+        static void RefreshTaskCallback(lv_task_t* task) {
+          auto* screen = static_cast<Bored*>(task->user_data);
+          screen->Refresh();
+        }
       };
     }
-
-    template <>
-    struct AppTraits<Apps::Dice> {
-      static constexpr Apps app = Apps::Dice;
-      static constexpr const char* icon = Screens::Symbols::dice;
-
-      static Screens::Screen* Create(AppControllers& controllers) {
-        return new Screens::Dice(controllers.motionController, controllers.motorController, controllers.settingsController);
-      };
-
-      static bool IsAvailable(Pinetime::Controllers::FS& /*filesystem*/) {
-        return true;
-      };
-    };
   }
 }
