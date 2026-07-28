@@ -40,6 +40,13 @@ jobs:
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
+          git reset --hard HEAD
+          chmod +x ./add_app.sh
+          ./add_app.sh "${{ github.event.inputs.app_name }}"
+
+
+      - name: Inject Custom Code into InfiniTime Files
+        run: |
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
