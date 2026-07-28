@@ -7,7 +7,6 @@
 #include "components/settings/Settings.h"
 #include "components/motor/MotorController.h"
 #include "components/motion/MotionController.h"
-#include "components/graphics/RgbColor.h"
 #include "lvgl/lvgl.h"
 
 namespace Pinetime {
