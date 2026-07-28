@@ -1,4 +1,4 @@
-name: Build Custom PineTime App
+name: Build Custom PineTime App (Max Speed + Full SDK)
 on:
   workflow_dispatch:
     inputs:
@@ -16,19 +16,22 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install Dependencies and ARM Compiler
+      # Installs the GCC compiler from GitHub's internal cache in ~2 seconds
+      - name: Setup ARM GCC Toolchain
+        uses: alecrem/setup-arm-gcc@v1
+        with:
+          version: '10.3-2021.10'
+
+      # Installs only light system requirements (Skipping GCC download)
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm ccache
+          sudo apt-get install -y cmake nodejs npm ccache
 
-      # --- HIGH SPEED ADDITION: Cache only the compiled libraries and ccache objects ---
-      - name: Cache Compiler Objects and Libraries
+      - name: Setup Compiler Cache
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/ccache
-            build/src/libs/lvgl
-            build/src/libs/mynewt-nimble
+          path: ~/.cache/ccache
           key: ${{ runner.os }}-lib-cache-${{ github.ref_name }}
           restore-keys: |
             ${{ runner.os }}-lib-cache-
@@ -37,7 +40,8 @@ jobs:
         run: |
           sudo npm install -g lv_font_conv
 
-      - name: Download NRF52 SDK v15.3.0
+      # Clones your preferred repository link cleanly and rapidly using --depth 1
+      - name: Download Full NRF52 SDK
         run: |
           git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
 
@@ -52,7 +56,7 @@ jobs:
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_PATH=./gcc-arm-none-eabi.cmake \
-            -DARM_NONE_EABI_TOOLCHAIN_PATH=/usr \
+            -DARM_NONE_EABI_TOOLCHAIN_PATH=${{ env.ARM_GCC_PATH }} \
             -DNRF5_SDK_PATH=${{ github.workspace }}/nrf_sdk \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
