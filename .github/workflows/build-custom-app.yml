@@ -24,8 +24,12 @@ jobs:
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
-      - name: Configure CMake Build
-        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+      - name: Configure CMake Build with Toolchain Flags
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_TOOLCHAIN_PATH=./gcc-arm-none-eabi.cmake \
+            -DARM_NONE_EABI_TOOLCHAIN_PATH=/usr
 
       - name: Build Firmware Packages
         run: cmake --build build --target pinetime-app -j$(nproc)
