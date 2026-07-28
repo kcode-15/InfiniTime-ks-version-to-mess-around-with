@@ -80,8 +80,8 @@ void Dice::Refresh() {
 // --- CORE MODIFICATION: 6 Custom Items ---
 void Dice::Roll() {
   const char* customItems[] = {
-    "Pizza", "Burgers", "Tacos",
-    "Salad", "Sushi", "Pasta"
+    "Read a book (one piece,james herriot, etc)", "Do some coding", "Hang with your fish",
+    "Play a board game with finn", "Chill on the sofa", "Listen to some music and do some painting"
   };
 
   std::uniform_int_distribution<> distrib(0, 5); // 0 to 5 (6 items)
