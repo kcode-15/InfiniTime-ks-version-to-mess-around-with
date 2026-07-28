@@ -23,9 +23,9 @@ python3 -c "
 with open('$APPS_H_FILE', 'r') as f: lines = f.readlines()
 if not any('$APP_NAME' in l for l in lines):
     for i, line in enumerate(lines):
-        if 'Dice' in line and ('{' not in line and '}' not in line):
-            # Extract the exact indentation used by the current file
-            indent = line_indent = line[''[:len(line)-len(line.lstrip())]] if line.lstrip() else '        '
+        if 'Dice' in line and '{' not in line and '}' not in line:
+            # Fixed the typo here to safely find the indentation
+            indent = line[:len(line)-len(line.lstrip())] if line.lstrip() else '        '
             lines.insert(i + 1, f'{indent}$APP_NAME,\n')
             break
     with open('$APPS_H_FILE', 'w') as f: f.writelines(lines)
@@ -37,7 +37,6 @@ with open('$DISPLAY_APP_FILE', 'r') as f: content = f.read()
 if 'displayapp/screens/$APP_NAME.h' not in content:
     content = content.replace('#include \"displayapp/screens/Dice.h\"', '#include \"displayapp/screens/Dice.h\"\n#include \"displayapp/screens/$APP_NAME.h\"')
 
-# Flexible matching for FlashLight block regardless of formatting specifics
 if 'case Apps::$APP_NAME:' not in content:
     import re
     pattern = r'(case\s+Apps::FlashLight:.*?break;)'
@@ -52,7 +51,6 @@ with open('$APPS_CPP_FILE', 'r') as f: lines = f.readlines()
 if not any('Apps::$APP_NAME' in l for l in lines):
     for i, line in enumerate(lines):
         if 'Apps::Dice' in line:
-            # Match the exact array style used
             lines.insert(i + 1, '  {\"\u25A1\", Apps::$APP_NAME, true},\n')
             break
     with open('$APPS_CPP_FILE', 'w') as f: f.writelines(lines)
