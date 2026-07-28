@@ -16,13 +16,12 @@ jobs:
         with:
           submodules: recursive
 
-      # Installs the GCC compiler from GitHub's internal cache in ~2 seconds
+      # --- FIXED COMPILER ACTION: Loads from global cache instantly ---
       - name: Setup ARM GCC Toolchain
-        uses: alecrem/setup-arm-gcc@v1
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          version: '10.3-2021.10'
+          release: '10.3-2021.10'
 
-      # Installs only light system requirements (Skipping GCC download)
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -40,10 +39,9 @@ jobs:
         run: |
           sudo npm install -g lv_font_conv
 
-      # Clones your preferred repository link cleanly and rapidly using --depth 1
       - name: Download Full NRF52 SDK
         run: |
-          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
+          git clone --depth 1 https://github.com nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
@@ -56,7 +54,7 @@ jobs:
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_PATH=./gcc-arm-none-eabi.cmake \
-            -DARM_NONE_EABI_TOOLCHAIN_PATH=${{ env.ARM_GCC_PATH }} \
+            -DARM_NONE_EABI_TOOLCHAIN_PATH=${{ env.ARM_NONE_EABI_GCC_PATH }} \
             -DNRF5_SDK_PATH=${{ github.workspace }}/nrf_sdk \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
