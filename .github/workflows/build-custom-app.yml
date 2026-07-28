@@ -39,7 +39,7 @@ jobs:
 
       - name: Download NRF52 SDK v15.3.0
         run: |
-          git clone --depth 1 https://github.com nrf_sdk
+          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
