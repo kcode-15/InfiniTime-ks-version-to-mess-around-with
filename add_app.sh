@@ -1,11 +1,11 @@
 #!/bin/bash
 APP_NAME=$1
 
-# 1. Find and update CMakeLists.txt (under Dice.cpp)
+# 1. Find and update CMakeLists.txt (under Dice.cpp entry)
 CMAKE_FILE=$(find . -name "CMakeLists.txt" | grep -v "build" | head -n 1)
 sed -i "/Dice.cpp/a \    displayapp/screens/${APP_NAME}.cpp" "$CMAKE_FILE"
 
-# 2. Find and update Apps.h (under Dice,)
+# 2. Find and update Apps.h (under Dice, enumeration)
 APPS_H_FILE=$(find . -name "Apps.h" | head -n 1)
 sed -i "/Dice,/a \        ${APP_NAME}," "$APPS_H_FILE"
 
