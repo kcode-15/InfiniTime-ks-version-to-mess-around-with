@@ -1,4 +1,4 @@
-name: Build Custom PineTime App (Max Speed + Full SDK)
+name: Build Custom PineTime App (Instant Speed)
 on:
   workflow_dispatch:
     inputs:
@@ -9,23 +9,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code with Submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # --- FIXED COMPILER ACTION: Loads from global cache instantly ---
-      - name: Setup ARM GCC Toolchain
-        uses: carlosperate/arm-none-eabi-gcc-action@v1
-        with:
-          release: '10.3-2021.10'
-
-      - name: Install System Dependencies
+      # Uses Ubuntu's internal, lightning-fast cross-compiler image packages directly
+      - name: Install System Dependencies and Compiler
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake nodejs npm ccache
+          sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm ccache
 
       - name: Setup Compiler Cache
         uses: actions/cache@v4
@@ -41,7 +36,7 @@ jobs:
 
       - name: Download Full NRF52 SDK
         run: |
-          git clone --depth 1 https://github.com nrf_sdk
+          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
@@ -54,7 +49,7 @@ jobs:
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_PATH=./gcc-arm-none-eabi.cmake \
-            -DARM_NONE_EABI_TOOLCHAIN_PATH=${{ env.ARM_NONE_EABI_GCC_PATH }} \
+            -DARM_NONE_EABI_TOOLCHAIN_PATH=/usr \
             -DNRF5_SDK_PATH=${{ github.workspace }}/nrf_sdk \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
