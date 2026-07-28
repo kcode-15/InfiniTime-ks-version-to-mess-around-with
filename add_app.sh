@@ -1,20 +1,23 @@
 #!/bin/bash
 APP_NAME=$1
 
-# 1. Add to CMakeLists.txt (under Dice.cpp)
-sed -i "/displayapp\/screens\/Dice.cpp/a \        displayapp/screens/${APP_NAME}.cpp" CMakeLists.txt
+# 1. Find and update CMakeLists.txt (under Dice.cpp)
+CMAKE_FILE=$(find . -name "CMakeLists.txt" | grep -v "build" | head -n 1)
+sed -i "/Dice.cpp/a \    displayapp/screens/${APP_NAME}.cpp" "$CMAKE_FILE"
 
-# 2. Add to Apps.h (under Dice,)
-sed -i "/Dice,/a \        ${APP_NAME}," src/displayapp/apps/Apps.h
+# 2. Find and update Apps.h (under Dice,)
+APPS_H_FILE=$(find . -name "Apps.h" | head -n 1)
+sed -i "/Dice,/a \        ${APP_NAME}," "$APPS_H_FILE"
 
-# 3. Add to DisplayApp.cpp Header Include (under Dice.h)
-sed -i "/#include \"displayapp\/screens\/Dice.h\"/a #include \"displayapp\/screens/${APP_NAME}.h\"" src/displayapp/DisplayApp.cpp
+# 3. Find and update DisplayApp.cpp Include Headers
+DISPLAY_APP_FILE=$(find . -name "DisplayApp.cpp" | head -n 1)
+sed -i "/#include \"displayapp\/screens\/Dice.h\"/a #include \"displayapp\/screens/${APP_NAME}.h\"" "$DISPLAY_APP_FILE"
 
-# 4. Add to DisplayApp.cpp Switch Case (under FlashLight)
-sed -i "/case Apps::FlashLight:/,/break;/ {
-  /break;/a \ \n    case Apps::${APP_NAME}:\n      currentScreen = std::make_unique<Screens::${APP_NAME}>(controllers.motionController, controllers.motorController, controllers.settingsController);\n      break;
-}" src/displayapp/DisplayApp.cpp
+# 4. Safely insert the Switch Case block into DisplayApp.cpp right above the default: case
+sed -i "/default:/i \    case Apps::${APP_NAME}:\n      currentScreen = std::make_unique<Screens::${APP_NAME}>(controllers.motionController, controllers.motorController, controllers.settingsController);\n      break;" "$DISPLAY_APP_FILE"
 
-# 5. Add to Apps.cpp Menu Array (under Dice entry)
-sed -i "/{Symbols::dice, Apps::Dice/,/},/ {
-  /},/a \  {\"\u25A1\", Apps::${APP_NAME}, true}," src/displayapp/apps/Apps.cpp
+# 5. Find and update Apps.cpp Menu Array (under Dice entry)
+APPS_CPP_FILE=$(find . -name "Apps.cpp" | head -n 1)
+sed -i "/Apps::Dice/a \  {\"\u25A1\", Apps::${APP_NAME}, true}," "$APPS_CPP_FILE"
+
+echo "Successfully injected code for ${APP_NAME}!"
