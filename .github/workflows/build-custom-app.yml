@@ -14,10 +14,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install Dependencies and ARM Compiler
+      # 1. Added ccache to the package installation step
+      - name: Install Dependencies, ARM Compiler, and Cache Tool
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm
+          sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm ccache
+
+      # 2. Automatically load and save the compiler cache files between workflow runs
+      - name: Setup Compiler Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
 
       - name: Install Font Converter
         run: |
@@ -25,20 +35,23 @@ jobs:
 
       - name: Download NRF52 SDK v15.3.0
         run: |
-          git clone --depth 1 https://github.com nrf_sdk
+          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
+      # 3. Passed the CCACHE compiler flags into CMake so it uses the cache system
       - name: Configure CMake Build
         run: |
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_TOOLCHAIN_PATH=./gcc-arm-none-eabi.cmake \
             -DARM_NONE_EABI_TOOLCHAIN_PATH=/usr \
-            -DNRF5_SDK_PATH=${{ github.workspace }}/nrf_sdk
+            -DNRF5_SDK_PATH=${{ github.workspace }}/nrf_sdk \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build Firmware Packages
         run: cmake --build build --target pinetime-app -j$(nproc)
