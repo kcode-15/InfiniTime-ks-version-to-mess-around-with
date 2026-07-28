@@ -19,11 +19,10 @@ jobs:
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
-      # This utilizes the existing InfiniTime docker build system to do the heavy lifting
       - name: Build Firmware
         run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspaceinfinitime/infra-build-env:trace-7 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace/build infinitime/infra-build-env:trace-7 cmake --build . --icon-count -j$(nproc)
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace infinitime/infra-build-env:trace-7 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace infinitime/infra-build-env:trace-7 cmake --build build --target pinetime-app -j$(nproc)
 
       - name: Upload Finished Zip Installer Artifact
         uses: actions/upload-artifact@v4
