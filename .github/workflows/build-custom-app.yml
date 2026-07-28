@@ -1,0 +1,32 @@
+name: Build Custom PineTime App
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'Enter the exact Name of your app (e.g., Bored)'
+        required: true
+        default: 'Bored'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Inject Custom Code into InfiniTime Files
+        run: |
+          chmod +x ./add_app.sh
+          ./add_app.sh "${{ github.event.inputs.app_name }}"
+
+      # This utilizes the existing InfiniTime docker build system to do the heavy lifting
+      - name: Build Firmware
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspaceinfinitime/infra-build-env:trace-7 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace/build infinitime/infra-build-env:trace-7 cmake --build . --icon-count -j$(nproc)
+
+      - name: Upload Finished Zip Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PineTime-${{ github.event.inputs.app_name }}-Firmware
+          path: build/bin/*.zip
