@@ -11,24 +11,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # --- CORE MODIFICATION: Fetch empty submodules dynamically ---
       - name: Checkout Code with Submodules
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Install Dependencies, ARM Compiler, and Cache Tool
+      - name: Install Dependencies and ARM Compiler
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm ccache
 
-      - name: Setup Compiler Cache
+      # --- HIGH SPEED ADDITION: Cache only the compiled libraries and ccache objects ---
+      - name: Cache Compiler Objects and Libraries
         uses: actions/cache@v4
         with:
-          path: ~/.cache/ccache
-          key: ${{ runner.os }}-ccache-${{ github.sha }}
+          path: |
+            ~/.cache/ccache
+            build/src/libs/lvgl
+            build/src/libs/mynewt-nimble
+          key: ${{ runner.os }}-lib-cache-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-ccache-
+            ${{ runner.os }}-lib-cache-
 
       - name: Install Font Converter
         run: |
@@ -36,17 +39,11 @@ jobs:
 
       - name: Download NRF52 SDK v15.3.0
         run: |
-          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
+          git clone --depth 1 https://github.com nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
           git reset --hard HEAD
-          chmod +x ./add_app.sh
-          ./add_app.sh "${{ github.event.inputs.app_name }}"
-
-
-      - name: Inject Custom Code into InfiniTime Files
-        run: |
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
