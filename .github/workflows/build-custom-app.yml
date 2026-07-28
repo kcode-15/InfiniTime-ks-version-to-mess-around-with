@@ -14,15 +14,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Install Dependencies and ARM Compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake gcc-arm-none-eabi
+
       - name: Inject Custom Code into InfiniTime Files
         run: |
           chmod +x ./add_app.sh
           ./add_app.sh "${{ github.event.inputs.app_name }}"
 
-      - name: Build Firmware
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace infinitime/infra-build-env:trace-7 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-          docker run --rm -v ${{ github.workspace }}:/workspace -w /workspace infinitime/infra-build-env:trace-7 cmake --build build --target pinetime-app -j$(nproc)
+      - name: Configure CMake Build
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Firmware Packages
+        run: cmake --build build --target pinetime-app -j$(nproc)
 
       - name: Upload Finished Zip Installer Artifact
         uses: actions/upload-artifact@v4
