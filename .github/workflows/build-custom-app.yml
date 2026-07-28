@@ -17,11 +17,15 @@ jobs:
       - name: Install Dependencies and ARM Compiler
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake gcc-arm-none-eabi
+          sudo apt-get install -y cmake gcc-arm-none-eabi nodejs npm
+
+      - name: Install Font Converter
+        run: |
+          sudo npm install -g lv_font_conv
 
       - name: Download NRF52 SDK v15.3.0
         run: |
-          git clone --depth 1 https://github.com/KunYi/nRF5_SDK_v15.git nrf_sdk
+          git clone --depth 1 https://github.com nrf_sdk
 
       - name: Inject Custom Code into InfiniTime Files
         run: |
