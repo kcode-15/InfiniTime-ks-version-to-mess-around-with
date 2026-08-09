@@ -2,6 +2,8 @@
 #include <cstring>
 #include "lvgl/lvgl.h"
 #include "displayapp/screens/Screen.h"
+#include "displayapp/apps/Apps.h"
+#include "displayapp/Controllers.h"
 
 namespace Pinetime {
   namespace Applications {
@@ -32,5 +34,19 @@ namespace Pinetime {
         bool OnTouchEvent(TouchEvents event) override;
       };
     }
+
+    template <>
+    struct AppTraits<Apps::PineUnlock> {
+      static constexpr Apps app = Apps::PineUnlock;
+      static constexpr const char* icon = "P";
+      
+      static Screens::Screen* Create(AppControllers& controllers) {
+        return new Screens::PineUnlock(controllers.displayApp);
+      }
+      
+      static bool IsAvailable(Controllers::FS& fs) {
+        return true;
+      }
+    };
   }
 }
