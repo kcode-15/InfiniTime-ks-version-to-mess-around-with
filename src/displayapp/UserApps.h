@@ -57,6 +57,20 @@ namespace Pinetime {
       return {CreateWatchFaceDescription<ts>()...};
     }
 
+    template <>
+    struct AppTraits<Apps::PineUnlock> {
+      static constexpr Apps app = Apps::PineUnlock;
+      static constexpr const char* icon = "P";
+      
+      static Screens::Screen* Create(AppControllers& controllers) {
+        return new Screens::PineUnlock(controllers.displayApp);
+      }
+      
+      static bool IsAvailable(Controllers::FS& fs) {
+        return true;
+      }
+    };
+
     constexpr auto userApps = CreateAppDescriptions(UserAppTypes {});
     constexpr auto userWatchFaces = CreateWatchFaceDescriptions(UserWatchFaceTypes {});
   }
