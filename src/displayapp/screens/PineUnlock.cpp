@@ -39,7 +39,6 @@ void PineUnlock::CreatePinSetupUI() {
   lv_obj_set_size(btnMatrix, 180, 150);
   lv_obj_set_event_cb(btnMatrix, BtnMatrixEventHandler);
   lv_obj_set_user_data(btnMatrix, this);
-  lv_btnmatrix_set_one_check(btnMatrix, false);
 }
 
 void PineUnlock::CreateLockScreenUI() {
@@ -55,7 +54,6 @@ void PineUnlock::CreateLockScreenUI() {
   lv_obj_set_size(btnMatrix, 180, 150);
   lv_obj_set_event_cb(btnMatrix, BtnMatrixEventHandler);
   lv_obj_set_user_data(btnMatrix, this);
-  lv_btnmatrix_set_one_check(btnMatrix, false);
 }
 
 void PineUnlock::BtnMatrixEventHandler(lv_obj_t* obj, lv_event_t event) {
